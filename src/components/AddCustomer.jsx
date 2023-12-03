@@ -26,7 +26,7 @@ export default function addCustomer({ fetchCustomers }) {
     setOpen(false);
   };
 
-  const saveCar = () => {
+  const saveCustomer = () => {
     fetch('http://traineeapp.azurewebsites.net/api/customers', {
       method: 'POST',
       headers: { 'Content-type':'application/json' },
@@ -110,7 +110,7 @@ export default function addCustomer({ fetchCustomers }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={saveCar}>Save</Button>
+          <Button onClick={saveCustomer}>Save</Button>
         </DialogActions>
       </Dialog>
     </div>

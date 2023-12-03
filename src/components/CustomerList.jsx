@@ -6,6 +6,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-material.css";
 
 import AddCustomer from "./AddCustomer";
+import EditCustomer from "./EditCustomer";
 
 
 function CustomerList() {
@@ -16,6 +17,7 @@ function CustomerList() {
   }, []);
 
   const [columnDefs] = useState([
+    { field: "id", hide: true },
     { field: "firstname", sortable: true, filter: true },
     { field: "lastname", sortable: true, filter: true },
     { field: "streetaddress", sortable: true, filter: true },
@@ -24,14 +26,20 @@ function CustomerList() {
     { field: "email", sortable: true, filter: true },
     { field: "phone", sortable: true, filter: true },
     {
-      cellRenderer: params => 
-        <Button size="small" onClick={() => deleteCustomer(params.data._links.customers.href)}>
+      cellRenderer: params => <EditCustomer fetchCustomers={fetchCustomers} data={params.data} />,
+      width: 120
+    },
+    {
+      cellRenderer: params => (
+        <Button size="small" onClick={() => deleteCustomer(params)}>
           Delete
-        </Button>,
+        </Button>
+      ),
       width: 120
     }
   ]);
-
+  
+  
   const fetchCustomers = () => {
     fetch('http://traineeapp.azurewebsites.net/api/customers')
       .then(response => {
@@ -53,20 +61,32 @@ function CustomerList() {
       .catch(err => console.error(err));
   };
 
-  const deleteCustomer = (url) => {
+  const deleteCustomer = (params) => {
+    console.log("Delete button clicked");
+    console.log("Params:", params);
+  
     if (window.confirm("Are you sure?")) {
-      fetch(url, { method: 'DELETE' })
-      .then(response => {
-        if (response.ok)
-          fetchCustomers();
-        else
-          throw new Error("Error in DELETE: " + response.statusText);
-      })
-      .catch(err => console.error(err))
+      // Extract the customer ID
+      const customerId = params.data?.id || params.node?.data?.id;
+  
+      if (customerId) {
+        const customerUrl = `http://traineeapp.azurewebsites.net/api/customers/${customerId}`;
+  
+        fetch(customerUrl, { method: 'DELETE' })
+          .then(response => {
+            if (response.ok)
+              fetchCustomers();
+            else
+              throw new Error("Error in DELETE: " + response.statusText);
+          })
+          .catch(err => console.error(err));
+      } else {
+        console.error("Unable to find customer ID in params.data");
       }
-  }
- 
-
+    }
+  };
+     
+  
   return (
     <>
     <AddCustomer fetchCustomers={fetchCustomers} />
