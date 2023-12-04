@@ -37,7 +37,8 @@ export default function EditCustomer({ fetchCustomers, data }) {
   };
 
   const saveCustomer = () => {
-    fetch('http://traineeapp.azurewebsites.net/api/customers', {
+    const customerUrl = data.links[0]["href"];
+    fetch(customerUrl, {
       method: 'PUT',
       headers: { 'Content-type':'application/json' },
       body: JSON.stringify(customer) 

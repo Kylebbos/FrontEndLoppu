@@ -25,10 +25,18 @@ function Training() {
     { field: "duration", sortable: true, filter: true },
     { field: "activity", sortable: true, filter: true },
     { field: "customer.firstname", headerName: "Customer Name", sortable: true, filter: true },
+    {
+      cellRenderer: params => (
+        <Button size="small" onClick={() => deleteTraining(params)}>
+          Delete
+        </Button>
+      ),
+      width: 120
+    }
   ]);
 
   const fetchTrainings = () => {
-    fetch('http://traineeapp.azurewebsites.net/api/trainings?_expand=customer')
+    fetch('http://traineeapp.azurewebsites.net/gettrainings')
       .then(response => {
         if (response.ok) {
           return response.json();
@@ -38,14 +46,28 @@ function Training() {
         }
       })
       .then(data => {
-        const embeddedTrainings = data.content;
-        if (embeddedTrainings) {
-          setTrainings(embeddedTrainings);
-        } else {
-          console.error("API response does not contain training data as expected.");
-        }
+        const modifiedData = data.map(item => ({
+          ...item
+        }));
+        setTrainings(modifiedData);
       })
       .catch(err => console.error(err));
+  };
+
+  const deleteTraining = (params) => {
+ 
+    if (window.confirm("Are you sure?")) {
+      const trainingUrl = `http://traineeapp.azurewebsites.net/api/trainings/${params.data.id}`;
+  
+      fetch(trainingUrl, { method: 'DELETE' })
+        .then(response => {
+          if (response.ok)
+            fetchTrainings();
+          else
+            throw new Error("Error in DELETE: " + response.statusText);
+        })
+        .catch(err => console.error(err));
+    }
   };
 
   return (

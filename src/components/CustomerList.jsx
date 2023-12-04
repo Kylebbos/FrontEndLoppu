@@ -9,6 +9,7 @@ import AddCustomer from "./AddCustomer";
 import EditCustomer from "./EditCustomer";
 
 
+
 function CustomerList() {
   const [customers, setCustomers] = useState([]);
 
@@ -62,27 +63,19 @@ function CustomerList() {
   };
 
   const deleteCustomer = (params) => {
-    console.log("Delete button clicked");
-    console.log("Params:", params);
-  
+ 
     if (window.confirm("Are you sure?")) {
-      // Extract the customer ID
-      const customerId = params.data?.id || params.node?.data?.id;
+
+      const customerUrl = params.data?.links[0]["href"] || params.node?.data?.links[0]["href"];
   
-      if (customerId) {
-        const customerUrl = `http://traineeapp.azurewebsites.net/api/customers/${customerId}`;
-  
-        fetch(customerUrl, { method: 'DELETE' })
-          .then(response => {
-            if (response.ok)
-              fetchCustomers();
-            else
-              throw new Error("Error in DELETE: " + response.statusText);
-          })
-          .catch(err => console.error(err));
-      } else {
-        console.error("Unable to find customer ID in params.data");
-      }
+      fetch(customerUrl, { method: 'DELETE' })
+        .then(response => {
+          if (response.ok)
+            fetchCustomers();
+          else
+            throw new Error("Error in DELETE: " + response.statusText);
+        })
+        .catch(err => console.error(err));
     }
   };
      

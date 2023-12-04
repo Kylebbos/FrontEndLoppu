@@ -9,11 +9,12 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 
-export default function AddTraining({ fetchTrainings }) {
+export default function AddTraining({ fetchTrainings, fetchCustomers }) {
   const [training, setTrainings] = React.useState({
     date: null,
     duration: '',
-    activity: ''
+    activity: '',
+    customerReference: ''
   });
 
   const [open, setOpen] = React.useState(false);
@@ -30,7 +31,8 @@ export default function AddTraining({ fetchTrainings }) {
     setTrainings({ ...training, date });
   };
 
-  const saveCar = () => {
+  const saveTraining = () => {
+    console.log(training)
     fetch('http://traineeapp.azurewebsites.net/api/trainings', {
       method: 'POST',
       headers: { 'Content-type': 'application/json' },
@@ -39,7 +41,6 @@ export default function AddTraining({ fetchTrainings }) {
       .then((response) => {
         if (!response.ok)
           throw new Error('Error when adding a training: ' + response.statusText);
-
         fetchTrainings();
       })
       .catch((err) => console.error(err));
@@ -79,10 +80,19 @@ export default function AddTraining({ fetchTrainings }) {
             value={training.activity}
             onChange={(e) => setTrainings({ ...training, activity: e.target.value })}
           />
+          <TextField
+            margin="dense"
+            label="TÄHÄN TULEE CUSTOMER REFERENCE JOLLAIN MENULLA"
+            fullWidth
+            variant="standard"
+            value={training.customerReference}
+            onChange={(e) => setTrainings({ ...training, customerReference: e.target.value })}
+          />
+          
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={saveCar}>Save</Button>
+          <Button onClick={saveTraining}>Save</Button>
         </DialogActions>
       </Dialog>
     </div>
