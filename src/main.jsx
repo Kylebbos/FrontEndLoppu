@@ -7,10 +7,12 @@ import Home from './home';
 import Error from './Error';
 import Training from './training';
 import Customer from './customer';
+import Calendar from './Calendar';
+import Statistic from './Statistic';
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <App />,
     errorElement: <Error />,
     children: [
@@ -19,15 +21,23 @@ const router = createBrowserRouter([
         index: true
       },
       {
-        path: "training",
+        path: 'training',
         element: <Training />,
       },
       {
-        path: "customer",
-        element: <Customer/>,
+        path: 'customer',
+        element: <Customer />,
       },
-    ]
-  }
+      {
+        path: 'calendar', 
+        element: <Calendar />,
+      },
+      {
+        path: 'statistic', 
+        element: <Statistic />,
+      },
+    ],
+  },
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(

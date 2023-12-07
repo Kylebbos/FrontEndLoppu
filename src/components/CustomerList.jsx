@@ -5,6 +5,8 @@ import Button from '@mui/material/Button';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-material.css";
 
+import { createObjectCsvWriter as createCsvWriter } from 'csv-writer';
+
 import AddCustomer from "./AddCustomer";
 import EditCustomer from "./EditCustomer";
 
@@ -78,11 +80,35 @@ function CustomerList() {
         .catch(err => console.error(err));
     }
   };
+
+  const exportToCSV = () => {
+    const csvContent = customers.map(customer =>
+      Object.values(customer).join(',')
+    );
+  
+    const csvString = [
+      Object.keys(customers[0]).join(','),
+      ...csvContent
+    ].join('\n');
+  
+    const blob = new Blob([csvString], { type: 'text/csv' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'customers.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  
+  
      
   
   return (
     <>
     <AddCustomer fetchCustomers={fetchCustomers} />
+    <Button variant="contained" color="primary" size="small" onClick={exportToCSV}>
+        Export to CSV
+      </Button>
       <div className="ag-theme-material" style={{ width: '100%', height: 600 }}>
         <AgGridReact
           rowData={customers}

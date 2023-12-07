@@ -1,3 +1,10 @@
+import React from 'react';
+import Typography from '@mui/material/Typography';
+
 export default function Home() {
-    return(<h2>Welcome to my personal trainer app!</h2>);
-  }
+  return (
+    <Typography variant="h4">
+     🏋🏻‍♀️ Welcome to my personal trainer app! 🚴🏼
+    </Typography>
+  );
+}
