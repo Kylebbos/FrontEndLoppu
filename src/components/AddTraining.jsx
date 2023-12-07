@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect, useState } from "react";
 import TextField from '@mui/material/TextField';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -9,41 +9,97 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 
-export default function AddTraining({ fetchTrainings, fetchCustomers }) {
-  const [training, setTrainings] = React.useState({
-    date: null,
+export default function AddTraining({ fetchTrainings }) {
+
+  const [allCustomers, setAllCustomers] = useState([])
+
+  const [open, setOpen] = useState(false);
+
+  const [training, setTrainings] = useState({
+    date: new Date(),
     duration: '',
     activity: '',
     customerReference: ''
   });
 
-  const [open, setOpen] = React.useState(false);
+  const [customerName, setCustomerName] = useState({name:''})
 
   const handleClickOpen = () => {
     setOpen(true);
+    customerResponse()
   };
 
   const handleClose = () => {
     setOpen(false);
   };
 
-  const handleDateChange = (date) => {
-    setTrainings({ ...training, date });
+  const handleDateChange = (newDate) => {
+    setTrainings(prevTraining => ({
+      ...prevTraining,
+      date: newDate || new Date()
+    }));
   };
 
+  const handleCustomerNameChange = () => {
+    console.log(allCustomers)
+    const foundCustomer = allCustomers.find(customer => customer.firstname === customerName.name);
+    return foundCustomer.id;
+  };
+
+  const customerResponse = () => {
+    fetch("http://traineeapp.azurewebsites.net/getcustomers")
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          console.error("Error in fetch:", response.status, response.statusText);
+          throw new Error("Failed to fetch");
+        }
+      })
+      .then((data) => {
+        const modifiedData = data.map((item) => ({
+          ...item,
+        }));
+        setAllCustomers(modifiedData);
+      })
+      .catch((err) => console.error(err));
+  };
   const saveTraining = () => {
-    console.log(training)
+    const customerId = handleCustomerNameChange();
+  
+    fetch(`http://traineeapp.azurewebsites.net/api/customers/${customerId}`)
+      .then(response => response.json())
+      .then(customerData => {
+        const updatedTraining = { 
+          ...training, 
+          customerReference: customerData
+        };
+  
+        setTrainings(updatedTraining);
+      })
+      .catch((err) => {
+        console.error(err);
+        handleClose();
+      });
+  };
+  useEffect(()=>{
+    if(training.customerReference){
+      postTraining(training);
+    }
+  },[training])
+  const postTraining = (updatedTraining) => {
     fetch('http://traineeapp.azurewebsites.net/api/trainings', {
       method: 'POST',
       headers: { 'Content-type': 'application/json' },
-      body: JSON.stringify(training),
+      body: JSON.stringify(updatedTraining),
     })
-      .then((response) => {
-        if (!response.ok)
-          throw new Error('Error when adding a training: ' + response.statusText);
-        fetchTrainings();
-      })
-      .catch((err) => console.error(err));
+    .then((response) => {
+      if (!response.ok) throw new Error('Error when adding a training: ' + response.statusText);
+      fetchTrainings();
+    })
+    .catch((err) => console.error(err));
+
+    console.log(training)
 
     handleClose();
   };
@@ -82,11 +138,11 @@ export default function AddTraining({ fetchTrainings, fetchCustomers }) {
           />
           <TextField
             margin="dense"
-            label="TÄHÄN TULEE CUSTOMER REFERENCE JOLLAIN MENULLA"
+            label="Customer name"
             fullWidth
             variant="standard"
-            value={training.customerReference}
-            onChange={(e) => setTrainings({ ...training, customerReference: e.target.value })}
+            value={customerName.name}
+            onChange={(e) => setCustomerName({ name: e.target.value })}
           />
           
         </DialogContent>
